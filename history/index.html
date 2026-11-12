@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The History and Origin of Ice Cream</title>
+    <link rel="icon" type="image/jpg" href="icecream.jpg">
+    
+    <style>
+        :root {
+            --primary-pink: #ffb7b2;
+            --creamy-white: #fff1e6;
+            --text-dark: #4a3728;
+            --accent-mint: #b5ead7;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: var(--creamy-white);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        header {
+            background-color: var(--primary-pink);
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 3.2rem;
+            margin: 0;
+        }
+
+        header p {
+            font-size: 1.3rem;
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 2; 
+        }
+
+        section {
+            padding: 2rem 0;
+            border-bottom: 2px dashed var(--primary-pink);
+        }
+
+        section:last-of-type {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: #d17a74;
+            font-size: 2.2rem;
+        }
+
+        #emoji-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1; 
+        }
+
+        .falling-emoji {
+            position: absolute;
+            font-size: 2.8rem;
+            user-select: none;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out, transform 0.3s ease-out;
+        }
+
+        footer {
+            background-color: var(--text-dark);
+            color: var(--creamy-white);
+            text-align: center;
+            padding: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="emoji-container"></div>
+
+    <header>
+        <h1>The Sweet Origin of Ice Cream</h1>
+        <p>A journey through time to discover how our favorite frozen treat was born.</p>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>Ancient Beginnings</h2>
+            <p>The origins of frozen desserts date back to early China (around 200 BC) and Roman Emperor Nero, who flavored mountain snow with fruits.</p>
+        </section>
+
+        <section>
+            <h2>The Persian Innovation</h2>
+            <p>Persians invented chilled rosewater and vermicelli dishes, utilizing underground structures called *Yakhchals* to store ice in the desert.</p>
+        </section>
+
+        <section>
+            <h2>Evolution in Europe</h2>
+            <p>Marco Polo introduced sherbet-like recipes to Italy, which later spread to the French royal court via Catherine de' Medici in 1553.</p>
+        </section>
+
+        <section>
+            <h2>The Modern Era</h2>
+            <p>Commercial availability began in late 17th-century Paris, leading to mass production and global ice cream culture in the 19th century.</p>
+        </section>
+    </div>
+
+    <footer>
+        Designed by TheGeekIceCream
+    </footer>
+
+    <script>
+        const emojiContainer = document.getElementById('emoji-container');
+        const iceCreamEmojis = ['🍦', '🍧', '🍨', '🍰', '🧁', '🍪', '🍫', '🍓', '🍒'];
+        const maxEmojisOnScreen = 24; 
+        let emojiElements = [];
+
+        function createEmoji(targetPeak = null) {
+            const span = document.createElement('span');
+            span.className = 'falling-emoji';
+            span.textContent = iceCreamEmojis[Math.floor(Math.random() * iceCreamEmojis.length)];
+            
+            const isLeft = Math.random() > 0.5;
+            const randomX = isLeft ? (Math.random() * 15) : (80 + Math.random() * 13);
+            
+            span.style.left = `${randomX}vw`;
+            span.style.top = `${Math.random() * 80}vh`;
+            
+            const scrollTop = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const currentPercent = maxScroll > 0 ? scrollTop / maxScroll : 0;
+            
+            span.dataset.peakScroll = targetPeak !== null ? targetPeak : (currentPercent + (Math.random() * 0.4) - 0.2);
+            span.dataset.speed = (Math.random() * 0.15) + 0.05;
+            span.dataset.isDying = "false";
+
+            emojiContainer.appendChild(span);
+            emojiElements.push(span);
+        }
+
+        for (let i = 0; i < maxEmojisOnScreen; i++) {
+            createEmoji(Math.random());
+        }
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const currentScrollPercent = maxScroll > 0 ? scrollTop / maxScroll : 0;
+
+            emojiElements = emojiElements.filter(emoji => {
+                const peak = parseFloat(emoji.dataset.peakScroll);
+                const distance = Math.abs(currentScrollPercent - peak);
+                
+                let opacity = 1 - (distance / 0.25); 
+                if (opacity < 0) opacity = 0;
+                
+                emoji.style.opacity = opacity * 0.65;
+
+                const speed = parseFloat(emoji.dataset.speed);
+                const drift = scrollTop * speed;
+                emoji.style.transform = `translateY(-${drift}px)`;
+
+                if (opacity === 0 && distance > 0.25 && emoji.dataset.isDying === "false") {
+                    emoji.dataset.isDying = "true";
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 800);
+                    return false;
+                }
+                return true;
+            });
+
+            while (emojiElements.length < maxEmojisOnScreen) {
+                createEmoji();
+            }
+        });
+    </script>
+</body>
+</html>
