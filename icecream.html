@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
+    <title>TheGeekIceCream - Ice Cream Roll Cool Launcher</title>
+    <link rel="icon" type="image/jpg" href="icecream.jpg">
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background-color: #1a1a1a; 
+            color: white; 
+            font-family: sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        #game-box { 
+            width: 100%; 
+            height: 100%; 
+            max-width: 400px; 
+            max-height: 850px; 
+            background: linear-gradient(#ff9a9e, #fecfef); 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        @media (min-width: 450px) and (min-height: 500px) {
+            #game-box {
+                border: 8px solid #333; 
+                border-radius: 20px; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                height: 85vh;
+            }
+        }
+
+        .btn { background: #ff4757; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 14px; }
+        
+        #alert-box { display: none; position: absolute; top: 30%; left: 5%; width: 90%; background: white; color: black; border-radius: 10px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10; }
+        
+        /* Fondo relajante con animación fluida de colores pastel */
+        #fake-desktop { 
+            display: none; 
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(-45deg, #a8c0ff, #cedfef, #e2d1f9, #b9fbc0);
+            background-size: 400% 400%;
+            animation: gradientBg 10s ease infinite;
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            padding-top: 40px; 
+        }
+
+        @keyframes gradientBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .app-icon { width: 50px; height: 50px; background: #1e90ff; border-radius: 10px; display: inline-block; margin: 15px; position: relative; font-size: 11px; line-height: 50px; color: white; font-weight: bold; cursor: pointer; text-align: center; user-select: none; }
+    </style>
+</head>
+<body>
+
+    <div id="game-box" onmousedown="initAudio()" ontouchstart="initAudio()">
+        <!-- PHASE 1: Ice Cream Minigame -->
+        <div id="ice-cream-game">
+            <h3 style="color: #333; margin-top: 50px; font-size: 22px;">Make Your Ice Cream Roll!</h3>
+            <img src="icecream.png" alt="Ice Cream" style="width: 120px; height: 120px; margin: 40px auto; display: block; object-fit: contain;">
+            <button class="btn" onmousedown="progressGame()" ontouchstart="progressGame(); event.preventDefault();">Roll It!</button>
+            <p style="color: #333; font-weight: bold; margin-top: 20px;">Progress: <span id="click-count">0</span>/5</p>
+        </div>
+
+        <!-- PHASE 2: Fake Launcher Permission -->
+        <div id="alert-box">
+            <h4 style="margin: 0 0 10px 0;">Permission Required</h4>
+            <p style="font-size: 14px; margin: 0 0 15px 0;">To keep playing with your rolls, set Ice Cream Roll as your default Home Launcher.</p>
+            <button class="btn" style="background: #2ed573; margin: 0;" onmousedown="activateLauncher()" ontouchstart="activateLauncher(); event.preventDefault();">Accept & Continue</button>
+        </div>
+
+        <!-- PHASE 3: Glitched Desktop with Relaxing Background -->
+        <div id="fake-desktop">
+            <div class="app-icon" id="icon1">Apps</div>
+            <div class="app-icon" id="icon2">Games</div>
+            <div class="app-icon" id="icon3">Photos</div>
+            <div class="app-icon" id="icon4">Settings</div>
+        </div>
+    </div>
+
+    <script>
+        let clicks = 0;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } 
+            else if (type === 'alert') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0, audioCtx.currentTime + 0.1);
+                
+                osc.frequency.setValueAtTime(660, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime + 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } 
+            else if (type === 'glitch') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(Math.random() * 300 + 80, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.06);
+            }
+        }
+
+        function progressGame() {
+            clicks++;
+            document.getElementById('click-count').innerText = clicks;
+            
+            if(clicks < 5) {
+                playSound('click');
+            } else {
+                document.getElementById('alert-box').style.display = 'block';
+                playSound('alert');
+            }
+        }
+
+        function activateLauncher() {
+            document.getElementById('alert-box').style.display = 'none';
+            document.getElementById('ice-cream-game').style.display = 'none';
+            document.getElementById('fake-desktop').style.display = 'block';
+            
+            const gameBox = document.getElementById('game-box');
+
+            setInterval(() => {
+                const maxX = gameBox.clientWidth - 65;
+                const maxY = gameBox.clientHeight - 65;
+
+                ['icon1', 'icon2', 'icon3', 'icon4'].forEach(id => {
+                    let icon = document.getElementById(id);
+                    if(icon) {
+                        icon.style.position = 'absolute';
+                        icon.style.left = Math.random() * maxX + 'px';
+                        icon.style.top = Math.random() * maxY + 'px';
+                    }
+                });
+                
+                playSound('glitch');
+            }, 600);
+        }
+    </script>
+</body>
+</html>
